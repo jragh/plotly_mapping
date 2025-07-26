@@ -9,8 +9,6 @@ window.dashExtensions = Object.assign({}, window.dashExtensions, {
                 colorprop
             } = context.hideout;
 
-
-            console.log(colorprop);
             const value = feature.properties[colorprop];
 
             for (let i = 0; i < colorvalues.length; i++) {

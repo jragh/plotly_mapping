@@ -36,8 +36,6 @@ style_handling_test = assign("""function(feature, context){
     
     const {colorvalues, colorscale, style, colorprop} = context.hideout;
                              
-
-    console.log(colorprop);
     const value = feature.properties[colorprop];
 
     for (let i=0; i < colorvalues.length; i++) {
@@ -96,15 +94,29 @@ layout = dmc.AppShell([
                 #     data=cma_names_codes
                 # )
             ]),
+
+            ## Grid Section for headers ##
+
+            dmc.Container(
+                dmc.Grid(
+
+                    dmc.GridCol(span={'base': 4, 'sm': 12}),
+                    dmc.GridCol(span={'base': 4, 'sm': 12}),
+                    dmc.GridCol(span={'base': 4, 'sm': 12})
+
+                )
+            )
+            ,
+
+
             dmc.Container(
                 dl.Map([tile_layer, base_geojson],
-                       style={'height': '50vh',
-                              "borderRadius": '12px'},
+                       style={"borderRadius": '12px',
+                              'height': '100%'},
                        center=[43.6, -79],
                        zoom=10,
                        className='dash-leaflet-main-map'
-                ), style={'padding': '0.2rem'},
-                className='dash-leaflet-main-container'
+                ),className='dash-leaflet-main-container'
             ),
 
             ## Empty dcc.Store to store arbitrary json ##

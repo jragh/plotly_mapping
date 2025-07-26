@@ -1,3 +1,10 @@
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
 .dash-leaflet-main-container{
-    filter: drop-shadow(0.1rem 0.2rem 0.4rem hsl(0deg 0% 63%))
+    filter: drop-shadow(0.1rem 0.2rem 0.4rem hsl(0deg 0% 63%));
+    padding: 0.2rem;
+    height: 70vh;
 }
