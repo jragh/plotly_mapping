@@ -108,7 +108,10 @@ layout = dmc.AppShell([
             ),
 
             ## Empty dcc.Store to store arbitrary json ##
-            dcc.Store(id='geojson-store-data', data={})
+            dcc.Store(id='geojson-store-data', data={}),
+
+            ## E,pty dcc.Store to keep CMA / CA Aggregated Stats JSON ##
+            dcc.Store(id='cma-ca-agg-store-data', data={})
         ]
     )]
     
@@ -194,6 +197,7 @@ clientside_callback(
 
 @callback(
     Output(component_id='geojson-store-data', component_property='data'),
+    Output(component_id='cma-ca-agg-store-data', component_property='data'),
     Input(component_id='geojson-selection', component_property='value')
 )
 def geojson_selection(selected_data):
@@ -203,9 +207,14 @@ def geojson_selection(selected_data):
         ## Open file geojson from value ##
         with open(selected_data, 'r') as f:
 
-            return_data = json.load(f)
+            return_data_1 = json.load(f)
 
-            return return_data
+        ## Open json for cma / ca aggregated stats ##
+        with open('./assets/cma_ct_travel_stats_agg.json', 'r') as f:
+
+            return_data_2 = json.load(f)
+        
+        return return_data_1, return_data_2
 
     
     else:
