@@ -96,22 +96,77 @@ layout = dmc.AppShell([
                 #     data=cma_names_codes
                 # )
             ]),
-            dmc.Container(
+            dmc.Container([
+                dmc.Grid(
+                    grow=True,
+                    gutter='md',
+                    justify='center',
+                    children = [
+                        ## Column Number 1 for Public Transit Commuters ##
+                        dmc.GridCol(
+                           [
+                                   html.Span([
+                                   html.H6('Total Public Transit Commuters', style={'marginTop': '0', 'marginBottom': '0'}), 
+                                   DashIconify(icon="map:transit-station", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
+                                ], 
+                                style={'borderRadius': '25px', 'backgroundColor': '#ff945d', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
+                            ], span={'xs': 12, 'sm': 6, 'md': 3}
+                        ),
+
+                        ## Column Number 2 for Public Transit Share in CMA ##
+                        dmc.GridCol([
+                            html.Span([
+                                html.H6('Pct CMA Transit Commuters', style={'marginTop': '0', 'marginBottom': '0'}),
+                                DashIconify(icon="f7:chart-pie-fill", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
+                            ],
+                            style={'borderRadius': '25px', 'backgroundColor': '#ff945d', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
+                        ],
+                        span={'xs': 12, 'sm': 6, 'md': 3}),
+
+                        ## Column Number 3 for Private Automobilt Commuters in CMA ##
+                        dmc.GridCol([
+                            html.Span([
+                                html.H6('Total Private Automobile Commuters', style={'marginTop': '0', 'marginBottom': '0'}),
+                                DashIconify(icon="f7:car-fill", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
+                            ],
+                            style={'borderRadius': '25px', 'backgroundColor': '#6a9ad4', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
+                        ],
+                        span={'xs': 12, 'sm': 6, 'md': 3}),
+
+                        ## Column Number 4 for Private Automobile Share in CMA ##
+                        dmc.GridCol([
+                            html.Span([
+                                html.H6('Pct CMA Private Automobile', style={'marginTop': '0', 'marginBottom': '0'}),
+                                DashIconify(icon="f7:chart-pie-fill", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
+                            ],
+                            style={'borderRadius': '25px', 'backgroundColor': '#6a9ad4', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
+                        ],
+                        span={'xs': 12, 'sm': 6, 'md': 3})
+                    ],
+                    id='map-grid-header' ## This id will be used to return children based on the query that is being pulled ##
+                ),
+
                 dl.Map([tile_layer, base_geojson],
-                       style={'height': '50vh',
+                       style={'height': '60vh',
                               "borderRadius": '12px'},
                        center=[43.6, -79],
                        zoom=10,
                        className='dash-leaflet-main-map'
-                ), style={'padding': '0.2rem'},
-                className='dash-leaflet-main-container'
+                )
+            ]
+                , style={'padding': '0.2rem', 'margin': '2rem'},
+                className='dash-leaflet-main-container',
+                fluid=True
             ),
 
             ## Empty dcc.Store to store arbitrary json ##
             dcc.Store(id='geojson-store-data', data={}),
 
             ## E,pty dcc.Store to keep CMA / CA Aggregated Stats JSON ##
-            dcc.Store(id='cma-ca-agg-store-data', data={})
+            dcc.Store(id='cma-ca-agg-store-data', data={}),
+
+            ## Empty Store to have the grid columns selected ##
+            dcc.Store(id='header-grid-selected', data={'selectedGrid': 'Travel Mode Analysis'})
         ]
     )]
     
@@ -220,6 +275,76 @@ def geojson_selection(selected_data):
     else:
 
         return no_update
+    
+
+## Callback for our columns ##
+@callback(
+    Output(component_id='header-grid-selected', component_property='data'),
+    Output(component_id='map-grid-header', component_property='children'),
+    Input(component_id='geojson-selection', component_property='value'),
+    State(component_id='header-grid-selected', component_property='data')
+)
+
+def update_grid_header(geojson_selected, hg_store_data):
+
+    working_data = hg_store_data.copy()
+
+    if geojson_selected == 'assets/test_output_2.geojson':
+
+        if working_data['selectedGrid'] == 'Travel Mode Analysis':
+
+            return no_update
+        
+        else:
+
+            return_children = [
+                        ## Column Number 1 for Public Transit Commuters ##
+                        dmc.GridCol(
+                           [
+                                   html.Span([
+                                   html.H6('Total Public Transit Commuters', style={'marginTop': '0', 'marginBottom': '0'}), 
+                                   DashIconify(icon="map:transit-station", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
+                                ], 
+                                style={'borderRadius': '25px', 'backgroundColor': '#ff945d', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
+                            ], span={'xs': 12, 'sm': 6, 'md': 3}
+                        ),
+
+                        ## Column Number 2 for Public Transit Share in CMA ##
+                        dmc.GridCol([
+                            html.Span([
+                                html.H6('Pct CMA Transit Commuters', style={'marginTop': '0', 'marginBottom': '0'}),
+                                DashIconify(icon="f7:chart-pie-fill", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
+                            ],
+                            style={'borderRadius': '25px', 'backgroundColor': '#ff945d', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
+                        ],
+                        span={'xs': 12, 'sm': 6, 'md': 3}),
+
+                        ## Column Number 3 for Private Automobilt Commuters in CMA ##
+                        dmc.GridCol([
+                            html.Span([
+                                html.H6('Total Private Automobile Commuters', style={'marginTop': '0', 'marginBottom': '0'}),
+                                DashIconify(icon="f7:car-fill", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
+                            ],
+                            style={'borderRadius': '25px', 'backgroundColor': '#6a9ad4', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
+                        ],
+                        span={'xs': 12, 'sm': 6, 'md': 3}),
+
+                        ## Column Number 4 for Private Automobile Share in CMA ##
+                        dmc.GridCol([
+                            html.Span([
+                                html.H6('Pct CMA Private Automobile', style={'marginTop': '0', 'marginBottom': '0'}),
+                                DashIconify(icon="f7:chart-pie-fill", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
+                            ],
+                            style={'borderRadius': '25px', 'backgroundColor': '#6a9ad4', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
+                        ],
+                        span={'xs': 12, 'sm': 6, 'md': 3})
+                    ]
+
+            return {'selectedGrid': 'Travel Mode Analysis'}, return_children
+        
+
+    ## Boilerplate no_update for now ##    
+    return no_update
 
 
 if __name__ == "__main__":

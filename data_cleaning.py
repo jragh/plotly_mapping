@@ -153,8 +153,8 @@ cma_ca_travel_stats_agg = travel_mode_ct_df_final_grouped.group_by(['CMA Code'])
 ])
 
 cma_ca_travel_stats_agg = cma_ca_travel_stats_agg.with_columns([
-    pl.col('Public Transit') / pl.when(pl.col('Total Commuters To Work') == 0).then(5).otherwise(pl.col('Total Commuters To Work')).alias('Pct of Public Transit Commute'),
-    pl.col('Automobile Drivers') / pl.when(pl.col('Total Commuters To Work') == 0).then(5).otherwise(pl.col('Total Commuters To Work')).alias('Pct of Automobile Driver Commute')
+    (pl.col('Public Transit') / pl.when(pl.col('Total Commuters To Work') == 0).then(5).otherwise(pl.col('Total Commuters To Work'))).alias('Pct of Public Transit Commute'),
+    (pl.col('Automobile Drivers') / pl.when(pl.col('Total Commuters To Work') == 0).then(5).otherwise(pl.col('Total Commuters To Work'))).alias('Pct of Automobile Driver Commute')
 ])
 
 with open('./assets/cma_ct_travel_stats_agg.json', 'w') as f:
