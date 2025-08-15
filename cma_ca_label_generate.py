@@ -32,7 +32,8 @@ cma_dropdown_component = dmc.Select(
                     styles={'option': {'fontSize': '0.8em'}},
                     data=cma_names_codes, 
                     searchable=True,
-                    id='cma-ca-selection'
+                    id='cma-ca-selection',
+                    disabled=True
                 
                 )
 

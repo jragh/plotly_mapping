@@ -1,6 +1,6 @@
 import polars as pl
 import plotly_express as px
-from dash import html, dcc, Input, Output, State, Dash, _dash_renderer, get_asset_url, no_update, clientside_callback, callback
+from dash import html, dcc, Input, Output, State, Dash, _dash_renderer, get_asset_url, no_update, clientside_callback, callback, ClientsideFunction
 import dash_mantine_components as dmc
 from flask import Flask, redirect
 from dash_iconify import DashIconify
@@ -12,6 +12,7 @@ from dash_extensions.javascript import assign, arrow_function
 
 ## import for CMA / CA selection ##
 from cma_ca_label_generate import cma_dropdown_component
+from cma_transit_mode_header import cma_transit_mode_header
 
 
 
@@ -97,55 +98,15 @@ layout = dmc.AppShell([
                 # )
             ]),
             dmc.Container([
-                dmc.Grid(
-                    grow=True,
-                    gutter='md',
-                    justify='center',
-                    children = [
-                        ## Column Number 1 for Public Transit Commuters ##
-                        dmc.GridCol(
-                           [
-                                   html.Span([
-                                   html.H6('Total Public Transit Commuters', style={'marginTop': '0', 'marginBottom': '0'}), 
-                                   DashIconify(icon="map:transit-station", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
-                                ], 
-                                style={'borderRadius': '25px', 'backgroundColor': '#ff945d', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
-                            ], span={'xs': 12, 'sm': 6, 'md': 3}
-                        ),
+                ## Component imported which is the header for our map ##
+                cma_transit_mode_header
+            ],style={'padding': '0.2rem', 'margin': '2rem'}
+            ,className='dash-leaflet-header-container'
+            ,id='dash-leaflet-header-container'
+            ,fluid=True
+            ),
 
-                        ## Column Number 2 for Public Transit Share in CMA ##
-                        dmc.GridCol([
-                            html.Span([
-                                html.H6('Pct CMA Transit Commuters', style={'marginTop': '0', 'marginBottom': '0'}),
-                                DashIconify(icon="f7:chart-pie-fill", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
-                            ],
-                            style={'borderRadius': '25px', 'backgroundColor': '#ff945d', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
-                        ],
-                        span={'xs': 12, 'sm': 6, 'md': 3}),
-
-                        ## Column Number 3 for Private Automobilt Commuters in CMA ##
-                        dmc.GridCol([
-                            html.Span([
-                                html.H6('Total Private Automobile Commuters', style={'marginTop': '0', 'marginBottom': '0'}),
-                                DashIconify(icon="f7:car-fill", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
-                            ],
-                            style={'borderRadius': '25px', 'backgroundColor': '#6a9ad4', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
-                        ],
-                        span={'xs': 12, 'sm': 6, 'md': 3}),
-
-                        ## Column Number 4 for Private Automobile Share in CMA ##
-                        dmc.GridCol([
-                            html.Span([
-                                html.H6('Pct CMA Private Automobile', style={'marginTop': '0', 'marginBottom': '0'}),
-                                DashIconify(icon="f7:chart-pie-fill", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
-                            ],
-                            style={'borderRadius': '25px', 'backgroundColor': '#6a9ad4', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
-                        ],
-                        span={'xs': 12, 'sm': 6, 'md': 3})
-                    ],
-                    id='map-grid-header' ## This id will be used to return children based on the query that is being pulled ##
-                ),
-
+            dmc.Container([
                 dl.Map([tile_layer, base_geojson],
                        style={'height': '60vh',
                               "borderRadius": '12px'},
@@ -155,7 +116,7 @@ layout = dmc.AppShell([
                 )
             ]
                 , style={'padding': '0.2rem', 'margin': '2rem'},
-                className='dash-leaflet-main-container',
+                className='dash-leaflet-map-container',
                 fluid=True
             ),
 
@@ -166,7 +127,7 @@ layout = dmc.AppShell([
             dcc.Store(id='cma-ca-agg-store-data', data={}),
 
             ## Empty Store to have the grid columns selected ##
-            dcc.Store(id='header-grid-selected', data={'selectedGrid': 'Travel Mode Analysis'})
+            dcc.Store(id='header-grid-selected', data={'selectedGrid': ''})
         ]
     )]
     
@@ -187,7 +148,61 @@ layout = dmc.AppShell([
 
 app.layout = dmc.MantineProvider(layout)
 
+
+@callback(
+    Output(component_id='geojson-store-data', component_property='data'),
+    Output(component_id='cma-ca-agg-store-data', component_property='data'),
+    Input(component_id='geojson-selection', component_property='value')
+)
+def geojson_selection(selected_data):
+
+    if selected_data == 'assets/test_output_2.geojson':
+
+        ## Open file geojson from value ##
+        with open(selected_data, 'r') as f:
+
+            return_data_1 = json.load(f)
+
+        ## Open json for cma / ca aggregated stats ##
+        with open('./assets/cma_ct_travel_stats_agg.json', 'r') as f:
+
+            return_data_2 = json.load(f)
+        
+        return return_data_1, return_data_2
+
+    
+    else:
+
+        return no_update
+
+## Clientside Callback for dropdown disablement and enablement ##
 clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='updateCMADropdown'
+    ),
+    Output('cma-ca-selection', 'disabled'),
+    Output('cma-ca-selection', 'value'),
+    Input('geojson-selection', 'value')
+
+)
+
+
+clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='updateCMATransitModeHeader'
+    ),
+    Output('cma_transit_mode_header_1', 'children'),
+    Output('cma_transit_mode_header_2', 'children'),
+    Output('cma_transit_mode_header_3', 'children'),
+    Output('cma_transit_mode_header_4', 'children'),
+    Input('cma-ca-selection', 'value'),
+    State('cma-ca-agg-store-data', 'data'),
+    State('geojson-selection', 'value')
+)
+
+app.clientside_callback(
 
     """
         function(selectedCMAS, storedData, selectedProperty) {
@@ -250,37 +265,14 @@ clientside_callback(
 )
 
 
-@callback(
-    Output(component_id='geojson-store-data', component_property='data'),
-    Output(component_id='cma-ca-agg-store-data', component_property='data'),
-    Input(component_id='geojson-selection', component_property='value')
-)
-def geojson_selection(selected_data):
 
-    if selected_data == 'assets/test_output_2.geojson':
 
-        ## Open file geojson from value ##
-        with open(selected_data, 'r') as f:
-
-            return_data_1 = json.load(f)
-
-        ## Open json for cma / ca aggregated stats ##
-        with open('./assets/cma_ct_travel_stats_agg.json', 'r') as f:
-
-            return_data_2 = json.load(f)
-        
-        return return_data_1, return_data_2
-
-    
-    else:
-
-        return no_update
     
 
 ## Callback for our columns ##
 @callback(
     Output(component_id='header-grid-selected', component_property='data'),
-    Output(component_id='map-grid-header', component_property='children'),
+    Output(component_id='dash-leaflet-header-container', component_property='children'),
     Input(component_id='geojson-selection', component_property='value'),
     State(component_id='header-grid-selected', component_property='data')
 )
@@ -298,54 +290,30 @@ def update_grid_header(geojson_selected, hg_store_data):
         else:
 
             return_children = [
-                        ## Column Number 1 for Public Transit Commuters ##
-                        dmc.GridCol(
-                           [
-                                   html.Span([
-                                   html.H6('Total Public Transit Commuters', style={'marginTop': '0', 'marginBottom': '0'}), 
-                                   DashIconify(icon="map:transit-station", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
-                                ], 
-                                style={'borderRadius': '25px', 'backgroundColor': '#ff945d', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
-                            ], span={'xs': 12, 'sm': 6, 'md': 3}
-                        ),
+                cma_transit_mode_header
+            ]
 
-                        ## Column Number 2 for Public Transit Share in CMA ##
-                        dmc.GridCol([
-                            html.Span([
-                                html.H6('Pct CMA Transit Commuters', style={'marginTop': '0', 'marginBottom': '0'}),
-                                DashIconify(icon="f7:chart-pie-fill", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
-                            ],
-                            style={'borderRadius': '25px', 'backgroundColor': '#ff945d', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
-                        ],
-                        span={'xs': 12, 'sm': 6, 'md': 3}),
-
-                        ## Column Number 3 for Private Automobilt Commuters in CMA ##
-                        dmc.GridCol([
-                            html.Span([
-                                html.H6('Total Private Automobile Commuters', style={'marginTop': '0', 'marginBottom': '0'}),
-                                DashIconify(icon="f7:car-fill", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
-                            ],
-                            style={'borderRadius': '25px', 'backgroundColor': '#6a9ad4', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
-                        ],
-                        span={'xs': 12, 'sm': 6, 'md': 3}),
-
-                        ## Column Number 4 for Private Automobile Share in CMA ##
-                        dmc.GridCol([
-                            html.Span([
-                                html.H6('Pct CMA Private Automobile', style={'marginTop': '0', 'marginBottom': '0'}),
-                                DashIconify(icon="f7:chart-pie-fill", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
-                            ],
-                            style={'borderRadius': '25px', 'backgroundColor': '#6a9ad4', 'display': 'inline-flex', 'align-items': 'center', 'padding': '0.25rem 0.5rem', 'flexWrap': 'nowrap', 'justifyContent': 'center'})
-                        ],
-                        span={'xs': 12, 'sm': 6, 'md': 3})
-                    ]
-
-            return {'selectedGrid': 'Travel Mode Analysis'}, return_children
+            return {'selectedGrid': 'Travel Mode Analysis', 'selectedGeography': 'All of Canada'}, return_children
         
 
     ## Boilerplate no_update for now ##    
     return no_update
 
+## clientside callback for setting the grid column values based on 
+# clientside_callback("""
+
+
+#     """,
+#     Output(),
+#     Output(),
+#     Output(),
+#     Output(),
+#     Output(),
+#     Input(),
+#     State(component_id='header-grid-selected', component_property='data'),
+#     State(component_id='')
+# )
+
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True) 
