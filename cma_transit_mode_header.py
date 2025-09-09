@@ -4,7 +4,7 @@ from dash_iconify import DashIconify
 
 cma_transit_mode_header = dmc.Grid(
     grow=True,
-    gutter='md',
+    gutter='xl',
     justify='center',
     children = [
         ## Column Number 1 for Public Transit Commuters ##
@@ -32,7 +32,7 @@ cma_transit_mode_header = dmc.Grid(
                         'marginTop': '0.5rem'
                     }, id='cma_transit_mode_header_1')
             ], span={'xs': 12, 'sm': 6, 'md': 3},
-            style={'maxWidth': '60vw'}
+            style={'maxWidth': '100vw', }
         ),
 
         ## Column Number 2 for Public Transit Share in CMA ##
@@ -62,27 +62,34 @@ cma_transit_mode_header = dmc.Grid(
 
         ## Column Number 3 for Private Automobilt Commuters in CMA ##
         dmc.GridCol([
-            html.Span([
+            
+            html.Div([
+
+                html.Span([
                 html.H6('Total Private Automobile Commuters', style={'marginTop': '0', 'marginBottom': '0'}),
                 DashIconify(icon="f7:car-fill", height=20, width=20, style={'marginLeft': '0.5rem', 'marginRight': '0.3rem'})
-            ],
-            style={
-                'borderRadius': '25px',
-                'backgroundColor': '#6a9ad4',
-                'display': 'inline-flex',
-                'align-items': 'center',
-                'padding': '0.25rem 0.5rem',
-                'flexWrap': 'nowrap',
-                'justifyContent': 'center'}),
+                ],
+                style={
+                    'borderRadius': '25px',
+                    'backgroundColor': '#4d86cc',
+                    'display': 'inline-flex',
+                    'align-items': 'center',
+                    'padding': '0.25rem 0.5rem',
+                    'flexWrap': 'nowrap',
+                    'justifyContent': 'center'}),
 
-            html.H1('N/A', style={
-                'color': '#6a9ad4',
-                'fontWeight': '900',
-                'margin': '0',
-                'padding': '0'
-            }, id='cma_transit_mode_header_3')
+                html.H1('N/A', style={
+                    'color': '#4d86cc',
+                    'fontWeight': '900',
+                    'margin': '.8rem 0 0 0',
+                    'padding': '0'
+                }, id='cma_transit_mode_header_3')
+
+            ], style={'background-color': '#c4d7ee'}, className='transit-mode-header-inner')
+            
             ],span={'xs': 12, 'sm': 6, 'md': 3},
-            style={'maxWidth': '60vw'}
+            style={'maxWidth': '60vw'},
+            className='transit-mode-header-cell'
         ),
 
         ## Column Number 4 for Private Automobile Share in CMA ##
@@ -107,7 +114,8 @@ cma_transit_mode_header = dmc.Grid(
                 'padding': '0'
             }, id='cma_transit_mode_header_4')
             ],span={'xs': 12, 'sm': 6, 'md': 3},
-        style={'maxWidth': '60vw'})
+        style={'maxWidth': '60vw', 'background-color': '#c4d7ee'},
+        className='transit-mode-header-cell')
     ],
     id='map-grid-header' ## This id will be used to return children based on the query that is being pulled ##
 )

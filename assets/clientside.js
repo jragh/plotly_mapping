@@ -32,13 +32,14 @@ let cmaTransitModeAggStatsSelection = function(selectedCMA, cmaTransitModeAggSta
 
         );
 
-        console.log(JSON.stringify(selectedData));
+        console.log((Math.round(selectedData[0]["Pct of Public Transit Commute"] * 100 * 10, 5) / 10).toFixed(2));
+        
 
         return [
-            selectedData[0]["Public Transit"].toString(),
-            selectedData[0]["Pct of Public Transit Commute"].toString(),
-            selectedData[0]["Automobile Drivers"].toString(),
-            selectedData[0]["Pct of Automobile Driver Commute"].toString()
+            `${selectedData[0]["Public Transit"].toLocaleString("en-US")}`,
+            `${(selectedData[0]["Pct of Public Transit Commute"] * 100).toFixed(2)}%`,
+            `${selectedData[0]["Automobile Drivers"].toLocaleString("en-US")}`,
+            `${(selectedData[0]["Pct of Automobile Driver Commute"] * 100).toFixed(2)}%`
         ]
 
     }
