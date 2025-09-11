@@ -13,4 +13,5 @@
     height: 100%;
     margin-left: .75rem;
     margin-right: .75rem;
+    filter: drop-shadow(0.1rem 0.2rem 0.4rem hsl(0deg 0% 63%))
 }
