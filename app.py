@@ -11,7 +11,7 @@ import dash_leaflet.express as dlx
 from dash_extensions.javascript import assign, arrow_function
 
 ## import for CMA / CA selection ##
-from cma_ca_label_generate import cma_dropdown_component
+from cma_ca_label_generate import cma_dropdown_component, cma_dropdown_value_label_store
 from cma_transit_mode_header import cma_transit_mode_header
 
 
@@ -97,10 +97,23 @@ layout = dmc.AppShell([
                 #     data=cma_names_codes
                 # )
             ]),
+
             dmc.Container([
+
+                ## Header section for key stat ##
+                html.H3(
+                    'Key Statistics: Select a Topic and CMA to view',
+                    id='key-stats-card-header',
+                    style={'margin': '0'})
+
+            ], style={'padding': '0.2rem', 'margin': '.25rem 2rem'}),
+
+            dmc.Container([
+
                 ## Component imported which is the header for our map ##
                 cma_transit_mode_header
-            ],style={'padding': '0.2rem', 'margin': '2rem'}
+
+            ],style={'padding': '0.2rem', 'margin': '2rem 2rem 1rem 2rem'}
             ,className='dash-leaflet-header-container'
             ,id='dash-leaflet-header-container'
             ,fluid=True
@@ -115,7 +128,7 @@ layout = dmc.AppShell([
                        className='dash-leaflet-main-map'
                 )
             ]
-                , style={'padding': '0.2rem', 'margin': '2rem'},
+                , style={'padding': '0.2rem', 'margin': '0.5rem 2rem 2rem 2rem'},
                 className='dash-leaflet-map-container',
                 fluid=True
             ),
@@ -127,7 +140,10 @@ layout = dmc.AppShell([
             dcc.Store(id='cma-ca-agg-store-data', data={}),
 
             ## Empty Store to have the grid columns selected ##
-            dcc.Store(id='header-grid-selected', data={'selectedGrid': ''})
+            dcc.Store(id='header-grid-selected', data={'selectedGrid': ''}),
+
+            ## dcc Store for CMA names and aggregated attribution ##
+            cma_dropdown_value_label_store
         ]
     )]
     
@@ -299,20 +315,21 @@ def update_grid_header(geojson_selected, hg_store_data):
     ## Boilerplate no_update for now ##    
     return no_update
 
-## clientside callback for setting the grid column values based on 
-# clientside_callback("""
+## Clientside callback for stats overview section ##
+clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='updateKeyStatsHeader'
+    ),
 
+    Output('key-stats-card-header', 'children'),
+    Input('geojson-selection', 'value'),
+    Input('cma-ca-selection', 'value'),
+    State('geojson-selection', 'value'),
+    State('cma-ca-selection', 'value'),
+    State('cma-dropdown-data-store', 'data')
+)
 
-#     """,
-#     Output(),
-#     Output(),
-#     Output(),
-#     Output(),
-#     Output(),
-#     Input(),
-#     State(component_id='header-grid-selected', component_property='data'),
-#     State(component_id='')
-# )
 
 
 if __name__ == "__main__":

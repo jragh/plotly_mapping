@@ -36,7 +36,7 @@ cma_transit_mode_header = dmc.Grid(
                 ], style={'background-color': '#ffCCB3'}, className='transit-mode-header-inner')
                     
             ], span={'xs': 12, 'sm': 6, 'md': 3},
-            style={'maxWidth': '60vw'},
+            style={'maxWidth': '70vw'},
             className='transit-mode-header-cell'
         ),
 
@@ -69,7 +69,7 @@ cma_transit_mode_header = dmc.Grid(
 
             
             ], span={'xs': 12, 'sm': 6, 'md': 3},
-            style={'maxWidth': '60vw'},
+            style={'maxWidth': '70vw'},
             className='transit-mode-header-cell'
         ),
 
@@ -101,7 +101,7 @@ cma_transit_mode_header = dmc.Grid(
             ], style={'background-color': '#c4d7ee'}, className='transit-mode-header-inner')
             
             ],span={'xs': 12, 'sm': 6, 'md': 3},
-            style={'maxWidth': '60vw'},
+            style={'maxWidth': '70vw'},
             className='transit-mode-header-cell'
         ),
 
@@ -133,7 +133,7 @@ cma_transit_mode_header = dmc.Grid(
             ], style={'background-color': '#c4d7ee'}, className='transit-mode-header-inner')
  
             ],span={'xs': 12, 'sm': 6, 'md': 3},
-        style={'maxWidth': '60vw'},
+        style={'maxWidth': '70vw'},
         className='transit-mode-header-cell')
     ],
     id='map-grid-header' ## This id will be used to return children based on the query that is being pulled ##
