@@ -29,9 +29,17 @@ cma_transit_mode_header = dmc.Grid(
                     html.H1('N/A', style={
                         'color': '#ff894d',
                         'fontWeight': '900',
-                        'margin': '.8rem 0 0 0',
+                        'margin': '.5rem 0 0 0',
                         'padding': '0'
-                    }, id='cma_transit_mode_header_1')
+                    }, id='cma_transit_mode_header_1'),
+
+                    ## html Small Section for subheader ##
+                    html.Small('Total Work Commuters using Public Transit', style={
+                        'fontSize': '0.6rem',
+                        'fontWeight': '550',
+                        'marginTop': '0',
+                        'color':'dimgrey'
+                    })
 
                 ], style={'background-color': '#ffCCB3'}, className='transit-mode-header-inner')
                     
@@ -61,9 +69,17 @@ cma_transit_mode_header = dmc.Grid(
                 html.H1('N/A', style={
                     'color': '#ff894d',
                     'fontWeight': '900',
-                    'margin': '.8rem 0 0 0',
+                    'margin': '.5rem 0 0 0',
                     'padding': '0'
-                }, id='cma_transit_mode_header_2')
+                }, id='cma_transit_mode_header_2'),
+
+                ## html Small Section for subheader ##
+                html.Small('Pct Work Commuters using Public Transit', style={
+                    'fontSize': '0.6rem',
+                    'fontWeight': '550',
+                    'marginTop': '0',
+                    'color':'dimgrey'
+                })
 
             ], style={'background-color': '#ffCCB3'}, className='transit-mode-header-inner')
 
@@ -94,9 +110,17 @@ cma_transit_mode_header = dmc.Grid(
                 html.H1('N/A', style={
                     'color': '#4d86cc',
                     'fontWeight': '900',
-                    'margin': '.8rem 0 0 0',
+                    'margin': '.5rem 0 0 0',
                     'padding': '0'
-                }, id='cma_transit_mode_header_3')
+                }, id='cma_transit_mode_header_3'),
+
+                ## html Small Section for subheader ##
+                html.Small('Total Work Commuters using Private Automobile (Driver)', style={
+                    'fontSize': '0.6rem',
+                    'fontWeight': '550',
+                    'marginTop': '0',
+                    'color':'dimgrey'
+                })
 
             ], style={'background-color': '#c4d7ee'}, className='transit-mode-header-inner')
             
@@ -126,9 +150,17 @@ cma_transit_mode_header = dmc.Grid(
                 html.H1('N/A', style={
                     'color': '#4d86cc',
                     'fontWeight': '900',
-                    'margin': '.8rem 0 0 0',
+                    'margin': '.5rem 0 0 0',
                     'padding': '0'
-                }, id='cma_transit_mode_header_4')
+                }, id='cma_transit_mode_header_4'),
+
+                ## html Small Section for subheader ##
+                html.Small('Pct Work Commuters using Private Automobile (Driver)', style={
+                    'fontSize': '0.6rem',
+                    'fontWeight': '550',
+                    'marginTop': '0',
+                    'color':'dimgrey'
+                })
 
             ], style={'background-color': '#c4d7ee'}, className='transit-mode-header-inner')
  
