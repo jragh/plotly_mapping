@@ -1,6 +1,6 @@
 import polars as pl
 import plotly_express as px
-from dash import html, dcc, Input, Output, State, Dash, _dash_renderer, get_asset_url, no_update, clientside_callback, callback
+from dash import html, dcc, Input, Output, State, Dash, _dash_renderer, get_asset_url, no_update, clientside_callback, callback, ClientsideFunction
 import dash_mantine_components as dmc
 from flask import Flask, redirect
 from dash_iconify import DashIconify
@@ -11,7 +11,8 @@ import dash_leaflet.express as dlx
 from dash_extensions.javascript import assign, arrow_function
 
 ## import for CMA / CA selection ##
-from cma_ca_label_generate import cma_dropdown_component
+from cma_ca_label_generate import cma_dropdown_component, cma_dropdown_value_label_store
+from cma_transit_mode_header import cma_transit_mode_header
 
 
 
@@ -96,19 +97,53 @@ layout = dmc.AppShell([
                 #     data=cma_names_codes
                 # )
             ]),
-            dmc.Container(
+
+            dmc.Container([
+
+                ## Header section for key stat ##
+                html.H3(
+                    'Key Statistics: Select a Topic and CMA to view',
+                    id='key-stats-card-header',
+                    style={'margin': '0'})
+
+            ], style={'padding': '0.2rem', 'margin': '.25rem 2rem'}),
+
+            dmc.Container([
+
+                ## Component imported which is the header for our map ##
+                cma_transit_mode_header
+
+            ],style={'padding': '0.2rem', 'margin': '2rem 2rem 1rem 2rem'}
+            ,className='dash-leaflet-header-container'
+            ,id='dash-leaflet-header-container'
+            ,fluid=True
+            ),
+
+            dmc.Container([
                 dl.Map([tile_layer, base_geojson],
-                       style={'height': '50vh',
+                       style={'height': '60vh',
                               "borderRadius": '12px'},
                        center=[43.6, -79],
                        zoom=10,
                        className='dash-leaflet-main-map'
-                ), style={'padding': '0.2rem'},
-                className='dash-leaflet-main-container'
+                )
+            ]
+                , style={'padding': '0.2rem', 'margin': '0.5rem 2rem 2rem 2rem'},
+                className='dash-leaflet-map-container',
+                fluid=True
             ),
 
             ## Empty dcc.Store to store arbitrary json ##
-            dcc.Store(id='geojson-store-data', data={})
+            dcc.Store(id='geojson-store-data', data={}),
+
+            ## E,pty dcc.Store to keep CMA / CA Aggregated Stats JSON ##
+            dcc.Store(id='cma-ca-agg-store-data', data={}),
+
+            ## Empty Store to have the grid columns selected ##
+            dcc.Store(id='header-grid-selected', data={'selectedGrid': ''}),
+
+            ## dcc Store for CMA names and aggregated attribution ##
+            cma_dropdown_value_label_store
         ]
     )]
     
@@ -129,7 +164,61 @@ layout = dmc.AppShell([
 
 app.layout = dmc.MantineProvider(layout)
 
+
+@callback(
+    Output(component_id='geojson-store-data', component_property='data'),
+    Output(component_id='cma-ca-agg-store-data', component_property='data'),
+    Input(component_id='geojson-selection', component_property='value')
+)
+def geojson_selection(selected_data):
+
+    if selected_data == 'assets/test_output_2.geojson':
+
+        ## Open file geojson from value ##
+        with open(selected_data, 'r') as f:
+
+            return_data_1 = json.load(f)
+
+        ## Open json for cma / ca aggregated stats ##
+        with open('./assets/cma_ct_travel_stats_agg.json', 'r') as f:
+
+            return_data_2 = json.load(f)
+        
+        return return_data_1, return_data_2
+
+    
+    else:
+
+        return no_update
+
+## Clientside Callback for dropdown disablement and enablement ##
 clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='updateCMADropdown'
+    ),
+    Output('cma-ca-selection', 'disabled'),
+    Output('cma-ca-selection', 'value'),
+    Input('geojson-selection', 'value')
+
+)
+
+
+clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='updateCMATransitModeHeader'
+    ),
+    Output('cma_transit_mode_header_1', 'children'),
+    Output('cma_transit_mode_header_2', 'children'),
+    Output('cma_transit_mode_header_3', 'children'),
+    Output('cma_transit_mode_header_4', 'children'),
+    Input('cma-ca-selection', 'value'),
+    State('cma-ca-agg-store-data', 'data'),
+    State('geojson-selection', 'value')
+)
+
+app.clientside_callback(
 
     """
         function(selectedCMAS, storedData, selectedProperty) {
@@ -192,26 +281,56 @@ clientside_callback(
 )
 
 
-@callback(
-    Output(component_id='geojson-store-data', component_property='data'),
-    Input(component_id='geojson-selection', component_property='value')
-)
-def geojson_selection(selected_data):
 
-    if selected_data == 'assets/test_output_2.geojson':
-
-        ## Open file geojson from value ##
-        with open(selected_data, 'r') as f:
-
-            return_data = json.load(f)
-
-            return return_data
 
     
-    else:
 
-        return no_update
+## Callback for our columns ##
+@callback(
+    Output(component_id='header-grid-selected', component_property='data'),
+    Output(component_id='dash-leaflet-header-container', component_property='children'),
+    Input(component_id='geojson-selection', component_property='value'),
+    State(component_id='header-grid-selected', component_property='data')
+)
+
+def update_grid_header(geojson_selected, hg_store_data):
+
+    working_data = hg_store_data.copy()
+
+    if geojson_selected == 'assets/test_output_2.geojson':
+
+        if working_data['selectedGrid'] == 'Travel Mode Analysis':
+
+            return no_update
+        
+        else:
+
+            return_children = [
+                cma_transit_mode_header
+            ]
+
+            return {'selectedGrid': 'Travel Mode Analysis', 'selectedGeography': 'All of Canada'}, return_children
+        
+
+    ## Boilerplate no_update for now ##    
+    return no_update
+
+## Clientside callback for stats overview section ##
+clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='updateKeyStatsHeader'
+    ),
+
+    Output('key-stats-card-header', 'children'),
+    Input('geojson-selection', 'value'),
+    Input('cma-ca-selection', 'value'),
+    State('geojson-selection', 'value'),
+    State('cma-ca-selection', 'value'),
+    State('cma-dropdown-data-store', 'data')
+)
+
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(debug=True) 

@@ -1,6 +1,7 @@
 import polars as pl
 from cma_ct_mapping_functions import extract_cma_code, extract_cma_string
 import dash_mantine_components as dmc
+from dash import dcc
 
 
 ## Open the CSV
@@ -23,6 +24,8 @@ cma_names_codes = [{'value': row[1], 'label': f'{row[0]} ({row[1]})'} for row in
 
 cma_names_codes.append({'value': "All CMAs / CAs", 'label': "All CMAs / CAs"})
 
+cma_dropdown_value_label_store = dcc.Store(id='cma-dropdown-data-store', data={'cma_listing': cma_names_codes})
+
 cma_dropdown_component = dmc.Select(
                     label='CMA Selection',
                     description="Please Note: 'All CMAs Option Very Slow'",
@@ -32,7 +35,8 @@ cma_dropdown_component = dmc.Select(
                     styles={'option': {'fontSize': '0.8em'}},
                     data=cma_names_codes, 
                     searchable=True,
-                    id='cma-ca-selection'
+                    id='cma-ca-selection',
+                    disabled=True
                 
                 )
 
