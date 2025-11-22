@@ -67,8 +67,28 @@ def generate_centroids_per_cma(cleaned_cma_json: str):
 
             # print(f"{cma_code} ---- {ctuid_id}")
             
-            print(list(polygon_centroid))
+            ## print(list(polygon_centroid))
 
+            ## Check to see if centroid exists in dictionary yet, if not then add else append ##
+            if cma_code in cma_centroids.keys():
+
+                cma_centroids[cma_code].append([float(polygon_centroid[0]), float(polygon_centroid[1])])
+
+            else:
+
+                cma_centroids[cma_code] = [[float(polygon_centroid[0]), float(polygon_centroid[1])]]
+
+        cma_bounds = {}
+        
+        for cma in cma_centroids.keys():
+
+            lats, longs = zip(*cma_centroids[cma])
+
+            bounds = [[min(lats), min(longs)], [max(lats), max(longs)]]
+
+            cma_bounds[cma] = bounds
+
+        print(cma_bounds)
 
     except Exception as e:
 
