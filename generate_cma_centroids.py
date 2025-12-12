@@ -4,7 +4,7 @@ import polars as pl
 import numpy as np
 from osgeo import gdal as gd
 
-def generate_centroids_per_cma(cleaned_cma_json: str):
+def generate_centroids_per_cma(cleaned_cma_json: str, output_path_centroids_obj: str):
 
     try:
 
@@ -72,11 +72,11 @@ def generate_centroids_per_cma(cleaned_cma_json: str):
             ## Check to see if centroid exists in dictionary yet, if not then add else append ##
             if cma_code in cma_centroids.keys():
 
-                cma_centroids[cma_code].append([float(polygon_centroid[0]), float(polygon_centroid[1])])
+                cma_centroids[cma_code].append([float(polygon_centroid[1]), float(polygon_centroid[0])])
 
             else:
 
-                cma_centroids[cma_code] = [[float(polygon_centroid[0]), float(polygon_centroid[1])]]
+                cma_centroids[cma_code] = [[float(polygon_centroid[1]), float(polygon_centroid[0])]]
 
         cma_bounds = {}
         
@@ -88,11 +88,19 @@ def generate_centroids_per_cma(cleaned_cma_json: str):
 
             cma_bounds[cma] = bounds
 
-        print(cma_bounds)
+        print(f"CMA Bounds that were generated: {cma_bounds}")
+
+        with open(output_path_centroids_obj, 'w') as file:
+
+            ## This section will write our CMA centroids to a JSON in the assets folder ##
+            ## Assets folder will load in JSON, no need to run processing ##
+            json.dump(cma_bounds, file, indent=2)
+
+        return cma_bounds
 
     except Exception as e:
 
         print('Error occurred with function `generate_centroids_per_cma`')
         print(f"Exception from the function is as follows: {e}")
 
-generate_centroids_per_cma('assets/test_output_2.geojson')
+generate_centroids_per_cma('assets/test_output_2.geojson', 'assets/cma_bounds.json')

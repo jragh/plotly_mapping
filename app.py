@@ -62,6 +62,15 @@ base_geojson = dl.GeoJSON(
 
 )
 
+cma_bounds_dict = None
+
+## Reading json file for CMA bounds to be loaded directly to DCC Store later on ##
+with open('assets/cma_bounds.json', 'r') as f:
+
+    cma_bounds_dict = json.load(f)
+
+print(cma_bounds_dict)
+
 
 layout = dmc.AppShell([
     
@@ -123,7 +132,12 @@ layout = dmc.AppShell([
                               "borderRadius": '12px'},
                        center=[43.6, -79],
                        zoom=10,
-                       className='dash-leaflet-main-map'
+                       className='dash-leaflet-main-map', 
+                       id='dash-leaflet-main-map',
+                       viewport={
+                           'transition': 'flyTo',
+                           'options': {'animate': True, 'duration': 1.5, 'easeLinearity': 0.2}
+                        }
                 )
             ]
                 , style={'padding': '0.2rem', 'margin': '0.5rem 2rem 2rem 2rem'},
@@ -141,7 +155,10 @@ layout = dmc.AppShell([
             dcc.Store(id='header-grid-selected', data={'selectedGrid': ''}),
 
             ## dcc Store for CMA names and aggregated attribution ##
-            cma_dropdown_value_label_store
+            cma_dropdown_value_label_store,
+
+            ## dcc.Store for CMA bounds, total JSON should be ~ 6kb so this should be light ##
+            dcc.Store(id='cma-bounds-store', data=cma_bounds_dict)
         ]
     )]
     
@@ -326,6 +343,19 @@ clientside_callback(
     State('geojson-selection', 'value'),
     State('cma-ca-selection', 'value'),
     State('cma-dropdown-data-store', 'data')
+)
+
+## Clientside callback to update leaflet map bounds ##
+## leaflet bounds based on CMA selection ##
+clientside_callback(
+    ClientsideFunction(
+        namespace='clientside',
+        function_name='updateLeafletMapBounds'
+    ),
+
+    Output('dash-leaflet-main-map', 'viewport'),
+    Input('cma-ca-selection', 'value'),
+    State('cma-bounds-store', 'data')
 )
 
 
