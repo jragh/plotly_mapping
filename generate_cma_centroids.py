@@ -1,8 +1,5 @@
 import json
-import pandas as pd
-import polars as pl
 import numpy as np
-from osgeo import gdal as gd
 
 def generate_centroids_per_cma(cleaned_cma_json: str, output_path_centroids_obj: str):
 

@@ -127,8 +127,6 @@ with open('assets/cma_bounds.json', 'r') as f:
 
     cma_bounds_dict = json.load(f)
 
-print(cma_bounds_dict)
-
 
 layout = dmc.AppShell([
     

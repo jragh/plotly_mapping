@@ -1,0 +1,18 @@
+# --- Dash app runtime ---
+dash==3.1.1
+dash-leaflet==1.0.15
+dash-mantine-components==2.1.0
+dash-extensions==1.0.20
+dash-iconify==0.1.2
+flask==3.1.1
+flask-caching==2.3.1
+plotly==6.2.0
+plotly_express==0.4.1
+polars==1.31.0
+
+# --- Data build pipeline (build_data.py) ---
+pandas==2.3.1
+numpy==2.0.2
+
+# --- Production WSGI server ---
+gunicorn==23.0.0
