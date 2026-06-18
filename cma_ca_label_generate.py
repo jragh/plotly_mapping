@@ -2,6 +2,7 @@ import polars as pl
 from cma_ct_mapping_functions import extract_cma_code, extract_cma_string
 import dash_mantine_components as dmc
 from dash import dcc
+from dash_iconify import DashIconify
 
 
 ## Open the CSV
@@ -27,17 +28,19 @@ cma_names_codes.append({'value': "All CMAs / CAs", 'label': "All CMAs / CAs"})
 cma_dropdown_value_label_store = dcc.Store(id='cma-dropdown-data-store', data={'cma_listing': cma_names_codes})
 
 cma_dropdown_component = dmc.Select(
-                    label='CMA Selection',
-                    description="Please Note: 'All CMAs Option Very Slow'",
+                    label='Region (CMA / CA)',
+                    description="Select a topic first · ‘All CMAs’ can be slow",
+                    placeholder='Search for a region…',
+                    leftSection=DashIconify(icon='solar:city-bold-duotone'),
                     clearable=False,
-                    style={'marginBottom': '2rem '},
                     ## Need to use Styles to deal with styles api ##,
                     styles={'option': {'fontSize': '0.8em'}},
-                    data=cma_names_codes, 
+                    data=cma_names_codes,
                     searchable=True,
+                    nothingFoundMessage='No matching region',
                     id='cma-ca-selection',
                     disabled=True
-                
+
                 )
 
 

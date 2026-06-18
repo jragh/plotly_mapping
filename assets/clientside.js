@@ -84,11 +84,140 @@ let cmaKeyStatsHeader = function(selectedGeojson, selectedCMA, stateGeojson, sta
 }
 
 
+// clientside callback function to animate zoom to bounds in leaflet based on selected CMA //
+let cmaLeafletMapBoundsZoom = function(selectedCMA, cmaCentroidObj) {
+
+    if (!selectedCMA || selectedCMA === undefined) {
+
+        return [window.dash_clientside.no_update];
+
+    }
+
+    
+
+    const bounds = (selectedCMA in cmaCentroidObj) ? cmaCentroidObj[selectedCMA] : undefined;
+
+    if (bounds === undefined || !bounds) { return [window.dash_clientside.no_update]; }
+
+    // Extract coordinates: [[south, west], [north, east]]
+    const [[south, west], [north, east]] = bounds;
+    
+    // Calculate center
+    const centerLat = (south + north) / 2;
+    const centerLon = (west + east) / 2;
+    
+    // Calculate zoom level based on bounds size
+    // Rough approximation: smaller area = higher zoom
+    const latDiff = Math.abs(north - south);
+    const lonDiff = Math.abs(east - west);
+    const maxDiff = Math.max(latDiff, lonDiff);
+    
+    // Zoom calculation (rough heuristic)
+    let zoom;
+    if (maxDiff > 5) zoom = 6;        // Very large area (multiple provinces)
+    else if (maxDiff > 2) zoom = 8;   // Large CMA
+    else if (maxDiff > 1) zoom = 9;   // Medium CMA
+    else if (maxDiff > 0.5) zoom = 10; // Small-medium CMA
+    else if (maxDiff > 0.25) zoom = 11; // Small CMA
+    else zoom = 12; // Very small area
+
+    let center = [centerLat, centerLon];
+
+    const viewport = {
+        'center': center,
+        'zoom': zoom,
+        'transition': 'flyTo',
+        'option': {'duration': 2, 'easeLinearity': 0.2}
+    };
+
+    // const viewport = {
+    //     'bounds': bounds,
+    //     'transition': 'flyToBounds',
+    //     'option': {'duration': 1.5, 'easeLinearity': 0.2, 'padding': [50, 50]}
+    // };
+
+    // Debug Logging on callback //
+    console.log(`viewport: ${JSON.stringify(viewport)}`);
+                           
+    // return [window.dash_clientside.no_update];
+
+    return viewport
+
+    // return [center, zoom]
+
+}
+
+
 // This is the main object that holds the references to functions for our client callbacks //
 window.dash_clientside = Object.assign({}, window.dash_clientside, {
     clientside: {
         updateCMADropdown: cmaDropdownEnablefunction,
         updateCMATransitModeHeader: cmaTransitModeAggStatsSelection,
-        updateKeyStatsHeader: cmaKeyStatsHeader
+        updateKeyStatsHeader: cmaKeyStatsHeader,
+        updateLeafletMapBounds: cmaLeafletMapBoundsZoom
     }
 })
+
+
+
+// // Get bounds for the selected CMA
+//             if (selectedCMA in allBounds) {
+//                 const bounds = allBounds[selectedCMA];
+//                 console.log('Bounds found:', bounds);
+                
+//                 // Find and animate the map
+//                 setTimeout(() => {
+//                     const mapElement = document.getElementById('dash-leaflet-main-map');
+                    
+//                     if (!mapElement) {
+//                         console.error('Map element not found');
+//                         return;
+//                     }
+                    
+//                     console.log('Map element found', mapElement);
+                    
+//                     // Method 1: Search for Leaflet map in window
+//                     let map = null;
+                    
+//                     if (window.L && window.L.Map) {
+//                         // Iterate through all properties in window to find the map
+//                         for (let key in window) {
+//                             try {
+//                                 if (window[key] instanceof L.Map) {
+//                                     if (window[key]._container === mapElement || 
+//                                         window[key]._container.id === 'dash-leaflet-main-map') {
+//                                         map = window[key];
+//                                         console.log('Found map via window search');
+//                                         break;
+//                                     }
+//                                 }
+//                             } catch(e) {
+//                                 // Skip properties that throw errors
+//                             }
+//                         }
+//                     }
+                    
+//                     // Method 2: Check if map is stored on the element
+//                     if (!map && mapElement._leaflet_id) {
+//                         console.log('Trying to find map via leaflet_id:', mapElement._leaflet_id);
+//                     }
+                    
+//                     if (map && map.flyToBounds) {
+//                         console.log('Calling flyToBounds with:', bounds);
+//                         map.flyToBounds(bounds, {
+//                             duration: 1.5,
+//                             easeLinearity: 0.25,
+//                             padding: [50, 50]
+//                         });
+//                     } else {
+//                         console.error('Map not found or flyToBounds not available');
+//                     }
+//                 }, 100);
+                
+//                 // Still return bounds as fallback
+//                 return bounds;
+//             }
+            
+//             console.log('CMA not found in bounds dictionary');
+//             return window.dash_clientside.no_update;
+//         }
