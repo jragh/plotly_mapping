@@ -127,7 +127,7 @@ let cmaLeafletMapBoundsZoom = function(selectedCMA, cmaCentroidObj) {
         'center': center,
         'zoom': zoom,
         'transition': 'flyTo',
-        'option': {'duration': 1.5, 'easeLinearity': 0.2}
+        'option': {'duration': 2, 'easeLinearity': 0.2}
     };
 
     // const viewport = {
