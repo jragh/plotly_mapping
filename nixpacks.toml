@@ -1,0 +1,22 @@
+# Railway / Nixpacks build configuration
+# -----------------------------------------------------------------------------
+# Pipeline order:  setup -> install -> build -> start
+#   install : Nixpacks auto-installs requirements.txt into a venv on PATH
+#   build   : regenerate the data artifacts so they are baked into the image
+#   start   : serve the Dash app with gunicorn on Railway's $PORT
+#
+# Building the data here (rather than at deploy/release time) is deliberate:
+# files written during the build are baked into the image and are therefore
+# visible to the running web process. Files written in a release/pre-deploy
+# step run in a throwaway container and would NOT reach the web service.
+# -----------------------------------------------------------------------------
+
+[phases.build]
+# Runs after dependencies are installed. Generates:
+#   assets/test_output_2.geojson, assets/cma_ct_travel_stats_agg.json,
+#   assets/cma_bounds.json
+cmds = ["python build_data.py"]
+
+[start]
+# app:server  -> the Flask server object exposed in app.py
+cmd = "gunicorn app:server --bind 0.0.0.0:$PORT --workers 2 --threads 4 --timeout 120"
